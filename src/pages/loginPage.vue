@@ -4,23 +4,26 @@
             <div class="logo">
                 <img src="../assets/logos/logo.svg" alt="">
             </div>
-            <div class="form-container">
-                <h1 class="form-container__title">Login</h1>
-                <div class="error">
-                </div>
-                <div class="form-container__form">
-                    <div class="form-field">
-                        <input @keyup="onTyping" type="text" placeholder="Email address">
-                        <span class="focus-border"></span>
+            <div class="loader">
+                <div :class="{spin:store.state.authCredential.isLogin}"></div>
+                <div class="form-container">
+                    <h1 class="form-container__title">Login</h1>
+                    <div class="error">
                     </div>
-                    <div class="form-field">
-                        <input @keyup="onTyping" type="password" placeholder="Password">
-                        <span class="focus-border"></span>
-                    </div>
-                    <button class="submit" disabled @click="onFormSubmit" >Login to your account</button>
-                    <div class="shortcut">
-                        Already have an account?
-                        <a @click="navigateToRegister"> Sign up</a>
+                    <div class="form-container__form">
+                        <div class="form-field">
+                            <input @keyup="onTyping" type="text" placeholder="Email address">
+                            <span class="focus-border"></span>
+                        </div>
+                        <div class="form-field">
+                            <input @keyup="onTyping" type="password" placeholder="Password">
+                            <span class="focus-border"></span>
+                        </div>
+                        <button class="submit" disabled @click="onFormSubmit">Login to your account</button>
+                        <div class="shortcut">
+                            Already have an account?
+                            <a @click="navigateToRegister"> Sign up</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -34,9 +37,9 @@
     export default {
         name: "loginView",
         methods: {
-            navigateToRegister(){
+            navigateToRegister() {
                 this.store.state.isNavigatingInFromLogin = true
-                this.$router.push({name : 'register'})
+                this.$router.push({name: 'register'})
             },
             onTyping() {
                 const formFields = document.getElementsByClassName("form-field")
@@ -50,38 +53,35 @@
                 }
                 this.toggleSubmitEnable()
             },
-            toggleSubmitEnable(){
+            toggleSubmitEnable() {
                 const btnSubmit = document.getElementsByClassName("submit")[0]
                 btnSubmit.disabled = !(this.store.state.authCredential.isLogin || this.store.state.authCredential.isInputsValid);
             },
             async onFormSubmit() {
-                this.store.state.authCredential.isLogin = true
                 this.toggleSubmitEnable()
-
                 const error = document.getElementsByClassName("error")[0]
                 const formFields = document.getElementsByClassName("form-field")
                 const email = String(formFields[0].getElementsByTagName("input")[0].value)
                 const pwd = String(formFields[1].getElementsByTagName("input")[0].value)
                 const responseStatus = await this.store.methods.login(email, pwd)
 
-                if (responseStatus === 200){
-                    await this.$router.push({name:'homePage'})
-                    this.toggleSubmitEnable()
-                }else {
+                if (responseStatus === 200) {
+                    await this.$router.push({name: 'homePage'})
+                } else {
                     if (responseStatus === 400 || responseStatus === 401) error.innerText = "Seems like the provided login and password don't match!"
-                    if(responseStatus === 500) error.innerText = "We're facing an issue try again if it persists come back latter!"
+                    if (responseStatus === 500) error.innerText = "We're facing an issue try again if it persists come back latter!"
+                    this.store.state.authCredential.isLogin = false
                     error.classList.add("animate")
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         error.classList.remove("animate")
                         this.toggleSubmitEnable()
-                    },3900)
+                    }, 3900)
                 }
-
             }
         },
         beforeCreate() {
             if (this.store.state.authCredential.token !== null) {
-                this.$router.push({name:'homePage'})
+                this.$router.push({name: 'homePage'})
             }
         },
         setup() {
@@ -99,7 +99,7 @@
     $greyishBlue: rgba(90, 105, 143);
     $red: rgba(252, 71, 71, 1);
 
-    .error{
+    .error {
         color: $white;
         font-size: 14px;
         margin-top: -15px;
@@ -110,32 +110,33 @@
         background-color: $red;
         overflow: hidden;
         text-align: center;
-        &.animate{
-            animation: error_expand .30s ease-in-out forwards ,error_fade_in .30s ease-in-out forwards .30s, error_fade_out .30s ease-in-out forwards 3s, error_collapse .30s ease-in-out forwards 3.5s;
+
+        &.animate {
+            animation: error_expand .30s ease-in-out forwards, error_fade_in .30s ease-in-out forwards .30s, error_fade_out .30s ease-in-out forwards 3s, error_collapse .30s ease-in-out forwards 3.5s;
         }
     }
 
 
-
     @keyframes error_expand {
-        to{
+        to {
             height: 40px;
         }
     }
 
     @keyframes error_collapse {
-        to{
+        to {
             height: 0;
         }
     }
+
     @keyframes error_fade_in {
-        to{
+        to {
             opacity: .7;
         }
     }
 
     @keyframes error_fade_out {
-        to{
+        to {
             opacity: 0;
         }
     }
@@ -168,14 +169,34 @@
             }
         }
 
+        .loader {
+            border-radius: 24px;
+            padding: 2px;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+
+            .spin {
+                animation: rotate 2s infinite linear;
+                background-image: conic-gradient(transparent 300deg, rgba(255, 255, 255, .3) 360deg);
+                position: absolute;
+                top: -50%;
+                left: -25%;
+                height: 200%;
+                width: 150%;
+                z-index: -1;
+            }
+        }
+
         .form-container {
             background: $semiDarkBlue;
             padding: 32px;
             border-radius: 20px;
             transition: all ease-in-out .15s;
+            z-index: 1;
+
 
             &__title {
-                /*border:solid red 1px;*/
                 margin: 0 0 40px 0;
                 font-weight: normal;
             }

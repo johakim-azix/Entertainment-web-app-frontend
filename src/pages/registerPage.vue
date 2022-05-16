@@ -4,28 +4,33 @@
             <div class="logo">
                 <img src="../assets/logos/logo.svg" alt="">
             </div>
-            <div class="form-container">
-                <h1 class="form-container__title">Sign Up</h1>
-                <div class="form-container__form">
-                    <div class="form-field">
-                        <input @keyup="onTyping" type="text" placeholder="Email address">
-                        <span class="focus-border"></span>
-                    </div>
-                    <div class="form-field">
-                        <input @keyup="onTyping" type="password" placeholder="Password">
-                        <span class="focus-border"></span>
-                    </div>
-                    <div class="form-field">
-                        <input @keyup="onTyping" type="password" placeholder="Repeat password">
-                        <span class="focus-border"></span>
-                    </div>
-                    <button class="submit" disabled @click="onFormSubmit">Create an account</button>
-                    <div class="shortcut">
-                        Already have an account?
-                        <router-link :to="{name : 'login'}"> Login</router-link>
+            <div class="loader">
+                <div :class="{spin:store.state.authCredential.isRegistering}"></div>
+                <div class="form-container">
+                    <h1 class="form-container__title">Sign Up</h1>
+                    <div class="_error"></div>
+                    <div class="form-container__form">
+                        <div class="form-field">
+                            <input @keyup="onTyping" type="text" placeholder="Email address">
+                            <span class="focus-border"></span>
+                        </div>
+                        <div class="form-field">
+                            <input @keyup="onTyping" type="password" placeholder="Password">
+                            <span class="focus-border"></span>
+                        </div>
+                        <div class="form-field">
+                            <input @keyup="onTyping" type="password" placeholder="Repeat password">
+                            <span class="focus-border"></span>
+                        </div>
+                        <button class="submit" disabled @click="onFormSubmit">Create an account</button>
+                        <div class="shortcut">
+                            Already have an account?
+                            <router-link :to="{name : 'login'}"> Login</router-link>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -81,10 +86,21 @@
                 this.displayFromValidationIssues(this.validateInputs(email, pwd, pwdConfirm,))
             },
             async onFormSubmit() {
+                const error = document.getElementsByClassName("_error")[0]
                 const formFields = document.getElementsByClassName("form-field")
                 const email = String(formFields[0].getElementsByTagName("input")[0].value)
                 const pwd = String(formFields[1].getElementsByTagName("input")[0].value)
-                if (await this.store.methods.register(email, pwd)) await this.$router.replace({name: 'login'})
+                if (await this.store.methods.register(email, pwd)){
+                    await this.$router.replace({name: 'login'})
+                }else{
+                    error.innerText = "We're facing an issue try again if it persists come back latter!"
+                    error.classList.add("animate")
+                    setTimeout(() => {
+                        error.classList.remove("animate")
+                        this.toggleSubmitEnable()
+                    }, 3900)
+                }
+                this.store.state.authCredential.isRegistering = false
             },
             displayFromValidationIssues(validationResults) {
                 const formFields = document.getElementsByClassName("form-field")
@@ -145,6 +161,48 @@
     $greyishBlue: rgba(90, 105, 143);
     $red: rgba(252, 71, 71, 1);
 
+    ._error {
+        color: $white;
+        font-size: 14px;
+        margin-top: -15px;
+        margin-bottom: 0;
+        opacity: 0;
+        height: 0;
+        border-radius: 3px;
+        background-color: $red;
+        overflow: hidden;
+        text-align: center;
+
+        &.animate {
+            animation: error_expand .30s ease-in-out forwards, error_fade_in .30s ease-in-out forwards .30s, error_fade_out .30s ease-in-out forwards 3s, error_collapse .30s ease-in-out forwards 3.5s;
+        }
+    }
+
+
+    @keyframes error_expand {
+        to {
+            height: 40px;
+        }
+    }
+
+    @keyframes error_collapse {
+        to {
+            height: 0;
+        }
+    }
+
+    @keyframes error_fade_in {
+        to {
+            opacity: .7;
+        }
+    }
+
+    @keyframes error_fade_out {
+        to {
+            opacity: 0;
+        }
+    }
+
     .container {
         color: white;
         position: absolute;
@@ -172,6 +230,26 @@
                 width: 100%;
             }
         }
+
+        .loader {
+            border-radius: 24px;
+            padding: 2px;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+
+            .spin {
+                animation: rotate 2s infinite linear;
+                background-image: conic-gradient(transparent 300deg, rgba(255, 255, 255, .3) 360deg);
+                position: absolute;
+                top: -50%;
+                left: -25%;
+                height: 200%;
+                width: 150%;
+                z-index: -1;
+            }
+        }
+
 
         .form-container {
             background: $semiDarkBlue;
@@ -350,6 +428,7 @@
             }
         }
     }
+
 
 
 </style>

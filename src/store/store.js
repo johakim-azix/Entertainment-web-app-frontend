@@ -94,15 +94,12 @@ const methods = {
             headers: headers,
             body: strBody
         })
-
-        if (response.status === 201) return true
-        state.authCredential.isRegistering = false
-        const jsonResponse = await response.json()
-        throw jsonResponse.data.message
-
+        return response.status === 201
     },
     async login(email, password) {
         try {
+            state.authCredential.isLogin = true
+
             const url = "http://localhost:4000/Api/login"
             const headers = new Headers({
                 "Content-type": "application/json"

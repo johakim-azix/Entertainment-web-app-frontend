@@ -3,9 +3,9 @@ import {reactive} from "vue"
 const state = reactive({
     isNavigatingInFromLogin: false,
     authCredential: {
-        isLogin:false,
-        isRegistering:false,
-        isInputsValid:false,
+        isLogin: false,
+        isRegistering: false,
+        isInputsValid: false,
         token: null,
         tokenType: null,
         userId: null,
@@ -63,15 +63,15 @@ const state = reactive({
             series: false,
             bookmarked: false
         },
-        modal_popup:{
+        modal_popup: {
             isImgShowerOpened: false,
-            isProfilePopupOpened : false,
+            isProfilePopupOpened: false,
             isUploadingImg: false,
-            isSelectingImg : false,
-            srcEncoded:{
-                large : "",
-                medium : "",
-                small : ""
+            isSelectingImg: false,
+            srcEncoded: {
+                large: "",
+                medium: "",
+                small: ""
             }
         }
     }
@@ -234,37 +234,35 @@ const methods = {
 
             const jsonResponse = await response.json()
             if (response.status === 200) {
-                setTimeout(() => {
-                    if (jsonResponse.data === null || jsonResponse.data.length === 0) {
-                        stateProperty.hasNoContent = true
-                        state.search.name = "No results for '"+state.search.strSearch+"'"
-                    } else {
-                        stateProperty.list = jsonResponse.data
-                        stateProperty.hasNoContent = false
-                        state.search.name = "Found " + state.search.list.length + " results for '" + state.search.strSearch + "'"
-                    }
-                }, 5000)
+
+                if (jsonResponse.data === null || jsonResponse.data.length === 0) {
+                    stateProperty.hasNoContent = true
+                    state.search.name = "No results for '" + state.search.strSearch + "'"
+                } else {
+                    stateProperty.list = jsonResponse.data
+                    stateProperty.hasNoContent = false
+                    state.search.name = "Found " + state.search.list.length + " results for '" + state.search.strSearch + "'"
+                }
+
             }
 
             if (response.status === 500) {
                 throw new Error(jsonResponse.issues)
             }
-            setTimeout(() => {
-                stateProperty.isLoading = false
-                stateProperty.error = false
-            }, 5000)
+
+            stateProperty.isLoading = false
+            stateProperty.error = false
+
         } catch (e) {
-            setTimeout(() => {
-                stateProperty.isLoading = false
-                stateProperty.error = true
-            }, 5000)
+
+            stateProperty.isLoading = false
+            stateProperty.error = true
+
         }
     },
     async addBookmarked(itemData, btnId) {
         const btn = document.getElementById(btnId)
         try {
-
-            //stop loading anim from the btn
             btn.disabled = true //disable the btn
             btn.classList.toggle("request-going")
 
@@ -283,79 +281,64 @@ const methods = {
                 headers: headers,
                 body: strBody
             })
-
             const jsonResponse = await response.json()
             if (response.status === 200) {
-                setTimeout(() => {
-                    methods.refreshLists(jsonResponse.data[0])
-                    if (btn.classList.contains("active")) {
-                        btn.classList.remove("active")
-                    } else {
-                        btn.classList.add("active")
-                    }
-                }, 3000)
+                methods.refreshLists(jsonResponse.data[0])
+                if (btn.classList.contains("active")) {
+                    btn.classList.remove("active")
+                } else {
+                    btn.classList.add("active")
+                }
             }
-
             if (response.status === 405) {
                 throw jsonResponse.data.message
             }
-
             if (response.status === 500) {
                 throw jsonResponse.data.message
             }
-            setTimeout(() => {
-                btn.disabled = false
-                btn.classList.toggle("request-going")
-            }, 3000)
+            btn.disabled = false
+            btn.classList.toggle("request-going")
         } catch (e) {
-            setTimeout(() => {
-                btn.disabled = false
-                btn.classList.toggle("request-going")
-                btn.classList.toggle("error")
-            }, 3000)
-
-            setTimeout(() => {
-                btn.classList.toggle("error")
-            }, 5000)
+            btn.disabled = false
+            btn.classList.toggle("request-going")
+            btn.classList.toggle("error")
         }
     },
     async filterMedia(strSearch, bookmarked, category) {
         const jsonBody = {
-            userId : state.authCredential.userId,
-            constraints : {
-                strSearch : strSearch,
-                isTrending : false,
-                isBookmarked : bookmarked,
-                category : category
+            userId: state.authCredential.userId,
+            constraints: {
+                strSearch: strSearch,
+                isTrending: false,
+                isBookmarked: bookmarked,
+                category: category
             }
         }
         await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, JSON.stringify(jsonBody))
     },
-    async uploadProfile(){
+    async uploadProfile() {
         state.navigation.modal_popup.isUploadingImg = true
         const url = "http://localhost:4000/Api/upload/avatar"
         const headers = new Headers({
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            "Authorization": 'Bearer '+state.authCredential.token
+            "Authorization": 'Bearer ' + state.authCredential.token
         })
         const response = await fetch(url, {
             method: "POST",
             headers: headers,
             body: JSON.stringify({
                 userId: state.authCredential.userId,
-                avatarLarge : state.navigation.modal_popup.srcEncoded.large,
-                avatarMedium : state.navigation.modal_popup.srcEncoded.medium,
-                avatarSmall : state.navigation.modal_popup.srcEncoded.small,
+                avatarLarge: state.navigation.modal_popup.srcEncoded.large,
+                avatarMedium: state.navigation.modal_popup.srcEncoded.medium,
+                avatarSmall: state.navigation.modal_popup.srcEncoded.small,
             })
         })
-        if (response.status === 200){
+        if (response.status === 200) {
             const jsonResponse = await response.json()
-            setTimeout(()=>{
-                state.authCredential.avatar = jsonResponse.data.avatar
-                state.navigation.modal_popup.isUploadingImg = false
-            },1000)
-        }else {
+            state.authCredential.avatar = jsonResponse.data.avatar
+            state.navigation.modal_popup.isUploadingImg = false
+        } else {
             state.navigation.modal_popup.isUploadingImg = false
         }
     },
@@ -365,7 +348,6 @@ const methods = {
         methods.refreshMovies(mediaUpdates)
         methods.refreshSeries(mediaUpdates)
         methods.refreshRecommendations(mediaUpdates)
-
     },
     refreshTrendings(mediaUpdates) {
         if (state.trending.list !== null && state.trending.list !== undefined) {

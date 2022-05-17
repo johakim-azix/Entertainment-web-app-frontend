@@ -1,7 +1,7 @@
 <template>
     <div class="search"> <!--todo : a component to be : search component -->
         <img src="../../assets/icons/icon-search.svg" alt="">
-        <input :disabled="(!(
+        <input id="searchInput" :disabled="(!(
                     (store.state.navigation.activeLink.home&&(store.state.recommendation.list.length!==0 &&store.state.trending.list.length!==0))
                     ||(store.state.navigation.activeLink.movies&&store.state.movies.list.length!==0)
                     ||(store.state.navigation.activeLink.series&&store.state.series.list.length!==0)
@@ -27,13 +27,12 @@
             const store = inject('store')
             // eslint-disable-next-line vue/no-setup-props-destructure
             store.state.search.placeHolder = props.place_holder
-
             setTimeout(() => {
-                if (store.state.search.isSearching) (document.getElementsByTagName("input")[0]).focus()
+                if (store.state.search.isSearching) (document.getElementById("searchInput")).focus()
             }, 5)
 
             function submitSearchConstraints() {
-                context.emit("onSearchConstraintSubmit", document.getElementsByTagName('input')[0].value)
+                context.emit("onSearchConstraintSubmit", document.getElementById("searchInput").value)
             }
 
             function emitOnSearchIntent() {

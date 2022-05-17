@@ -35,7 +35,12 @@
 
 
             async function loadMediaForConstrain(constraints) {
-                if (constraints.trim().length === 0) return
+                if (constraints.trim().length === 0){
+                    store.state.search.name = ""
+                    store.state.search.hasNoContent = true
+                    store.state.search.list = []
+                    return
+                }
                 store.state.search.strSearch = constraints
                 store.state.search.list = []
                 if (store.state.navigation.activeLink.home) await store.methods.filterMedia(constraints, false, null)

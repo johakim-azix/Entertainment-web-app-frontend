@@ -220,7 +220,7 @@ const methods = {
         try {
             const url = "http://localhost:4000/Api/medias/filter"
             stateProperty.isLoading = true
-
+            state.search.name = ""
             const headers = new Headers({
                 "Content-type": "application/json",
                 "Authorization": token
@@ -320,15 +320,16 @@ const methods = {
         }
     },
     async filterMedia(strSearch, bookmarked, category) {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "strSearch":"' + strSearch + '",' +
-            '                   "isTrending":false,' +
-            '                   "isBookmarked":' + bookmarked + ',' +
-            '                   "category" : ' + category + '' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, strBody)
+        const jsonBody = {
+            userId : state.authCredential.userId,
+            constraints : {
+                strSearch : strSearch,
+                isTrending : false,
+                isBookmarked : bookmarked,
+                category : category
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, JSON.stringify(jsonBody))
     },
     async uploadProfile(){
         state.navigation.modal_popup.isUploadingImg = true

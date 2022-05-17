@@ -1,5 +1,5 @@
 <template>
-    <search-field focused="" @onSearchIntent="moveToSearchResult" place_holder="Search for bookmarked shows"/>
+    <search-field @onSearchIntent="moveToSearchResult" place_holder="Search for bookmarked shows"/>
     <item-viewer name="Bookmarked Movies" :info="{bookmarked:true, series:false, movies:false, recommendation: false}"
                  :is-loading="store.state.bookmarked.isLoading" :has-issues="store.state.bookmarked.error"
                  :has-no-content="store.state.bookmarked.hasNoContent" :media-items="store.state.bookmarked.list"/>

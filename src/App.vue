@@ -12,12 +12,10 @@
 </script>
 
 <template>
-    <router-view/> <!--todo : here we display either the login view, eiter the register or the home view-->
+    <router-view/>
 </template>
 
 <style lang="scss">
-    /*todo : define some vars here like theme colors ans typo; start with some mixin and other stuffs here */
-
 
     $red: rgba(252, 71, 71, 1);
     $greyishBlue: rgba(90, 105, 143);

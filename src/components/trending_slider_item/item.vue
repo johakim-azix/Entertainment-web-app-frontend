@@ -1,6 +1,6 @@
 <template>
     <div class="item">
-        <img :src="'http://localhost:4000/'+mediaItem.images.trending.large" alt="">
+        <img :src="env.configs.IMG_URL+mediaItem.images.trending.large" alt="">
         <div class="item__cover">
             <button :id="'slider-btn-bookmark'+mediaItem._id" v-on:click="store.methods.addBookmarked(mediaItem,'slider-btn-bookmark'+mediaItem._id)" class="btn-bookmark" :class="{active:mediaItem.isBookmarked}">
                 <svg width="12" height="14" xmlns="http://www.w3.org/2000/svg">
@@ -28,6 +28,7 @@
 
 <script>
     import {inject} from "vue"
+    import env from "../../../env.configs"
     export default {
         // eslint-disable-next-line vue/multi-word-component-names
         name: "item",
@@ -35,7 +36,8 @@
         setup(){
             const store = inject("store")
             return {
-                store
+                store,
+                env
             }
         }
     }

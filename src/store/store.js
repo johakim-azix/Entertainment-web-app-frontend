@@ -1,10 +1,11 @@
 import {reactive} from "vue"
+import env from "../../env.configs"
 
 const state = reactive({
     isNavigatingInFromLogin: false,
     authCredential: {
         isLogin: false,
-        isLogingOut:false,
+        isLogingOut: false,
         isRegistering: false,
         isInputsValid: false,
         token: null,
@@ -81,19 +82,19 @@ const state = reactive({
 
 const methods = {
     async register(email, password) {
-        const url = "http://localhost:4000/Api/register"
+        const url = env.configs.API_URL + "register"
         const headers = new Headers({
             "Content-type": "application/json"
         })
-
-        const strBody = '{ "email": "' + email + '",' +
-            '              "password":"' + password + '" ' +
-            '           }'
+        const body = {
+            email: email,
+            password: password
+        }
         state.authCredential.isRegistering = true
         const response = await fetch(url, {
             method: "POST",
             headers: headers,
-            body: strBody
+            body: JSON.stringify(body)
         })
         return response.status === 201
     },
@@ -101,25 +102,22 @@ const methods = {
         try {
             state.authCredential.isLogin = true
 
-            const url = "http://localhost:4000/Api/login"
+            const url = env.configs.API_URL + "login"
             const headers = new Headers({
                 "Content-type": "application/json"
             })
-
-            const strBody = '{ "email": "' + email + '",' +
-                '              "password":"' + password + '" ' +
-                '           }'
-
+            const body = {
+                email: email,
+                password: password
+            }
             state.authCredential.isLogin = true
             const response = await fetch(url, {
                 method: "POST",
                 headers: headers,
-                body: strBody,
-                credentials:"include"
+                body: JSON.stringify(body),
+                credentials: "include"
             })
-
             const jsonResponse = await response.json()
-
             if (response.status === 200) {
                 state.authCredential.userId = jsonResponse.data.id
                 state.authCredential.email = jsonResponse.data.email
@@ -136,19 +134,16 @@ const methods = {
     },
     async logout() {
         try {
-            const url = "http://localhost:4000/Api/logout"
-
+            const url = env.configs.API_URL + "logout"
             state.authCredential.isLogingOut = true
             const response = await fetch(url, {
                 method: "GET",
                 credentials: "include"
             })
-
-            if (response.status === 200) {
-                //todo : reinitialize everything on the user and navogation
+            if (response.status === 200) { //reinitialize everything on the user and navogation
                 state.authCredential = {
                     isLogin: false,
-                    isLogingOut:false,
+                    isLogingOut: false,
                     isRegistering: false,
                     isInputsValid: false,
                     token: null,
@@ -181,7 +176,6 @@ const methods = {
                         }
                     }
                 }
-
                 state.authCredential.isLogingOut = false
             }
             return response.status
@@ -191,58 +185,63 @@ const methods = {
         }
     },
     async loadTrendingList() {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "isTrending":true,' +
-            '                   "isBookmarked":false,' +
-            '                   "category" : null' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.trending, strBody)
+        const body = {
+            userId: state.authCredential.userId,
+            constraints: {
+                isTrending: true,
+                isBookmarked: false,
+                category: null
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.trending, JSON.stringify(body))
     },
     async loadRecommendations() {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "isTrending":false,' +
-            '                   "isBookmarked":false,' +
-            '                   "category" : null' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.recommendation, strBody)
+        const body = {
+            userId: state.authCredential.userId,
+            constraints: {
+                isTrending: false,
+                isBookmarked: false,
+                category: null
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.recommendation, JSON.stringify(body))
     },
     async loadMovies() {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "isTrending":false,' +
-            '                   "isBookmarked":false,' +
-            '                   "category" : "Movie"' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.movies, strBody)
+        const body = {
+            userId: state.authCredential.userId,
+            constraints: {
+                isTrending: false,
+                isBookmarked: false,
+                category: "Movie"
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.movies, JSON.stringify(body))
     },
     async loadSeries() {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "isTrending":false,' +
-            '                   "isBookmarked":false,' +
-            '                   "category" : "TV Series"' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.series, strBody)
+        const body = {
+            userId: state.authCredential.userId,
+            constraints: {
+                isTrending: false,
+                isBookmarked: false,
+                category: "TV Series"
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.series, JSON.stringify(body))
     },
     async loadBookmarked() {
-        const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-            '   "constraints":{' +
-            '                   "isTrending":false,' +
-            '                   "isBookmarked":true,' +
-            '                   "category" : null' +
-            '                   }' +
-            '   }'
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.bookmarked, strBody)
+        const body = {
+            userId: state.authCredential.userId,
+            constraints: {
+                isTrending: false,
+                isBookmarked: true,
+                category: null
+            }
+        }
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.bookmarked, JSON.stringify(body))
     },
     async fetchData(token, stateProperty, strBody) {
         try {
-            const url = "http://localhost:4000/Api/medias/filter"
+            const url = env.configs.API_URL + "medias/filter"
             stateProperty.isLoading = true
             state.search.name = ""
             const headers = new Headers({
@@ -254,7 +253,7 @@ const methods = {
                 method: "POST",
                 headers: headers,
                 body: strBody,
-                credentials:"include"
+                credentials: "include"
             })
 
             const jsonResponse = await response.json()
@@ -268,21 +267,16 @@ const methods = {
                     stateProperty.hasNoContent = false
                     state.search.name = "Found " + state.search.list.length + " results for '" + state.search.strSearch + "'"
                 }
-
             }
 
             if (response.status === 500) {
                 throw new Error(jsonResponse.issues)
             }
-
             stateProperty.isLoading = false
             stateProperty.error = false
-
         } catch (e) {
-
             stateProperty.isLoading = false
             stateProperty.error = true
-
         }
     },
     async addBookmarked(itemData, btnId) {
@@ -291,20 +285,19 @@ const methods = {
             btn.disabled = true //disable the btn
             btn.classList.toggle("request-going")
 
-            const url = "http://localhost:4000/Api/add/bookmark"
+            const url = env.configs.API_URL + "add/bookmark"
             const headers = new Headers({
                 "Content-type": "application/json",
                 "Authorization": state.authCredential.token
             })
-
-            const strBody = '{"userId": "' + state.authCredential.userId + '",' +
-                '              "mediaId":"' + itemData._id + '" ' +
-                '           }'
-
+            const body = {
+                userId: state.authCredential.userId,
+                mediaId: itemData._id
+            }
             const response = await fetch(url, {
                 method: "POST",
                 headers: headers,
-                body: strBody
+                body: JSON.stringify(body)
             })
             const jsonResponse = await response.json()
             if (response.status === 200) {
@@ -330,7 +323,7 @@ const methods = {
         }
     },
     async filterMedia(strSearch, bookmarked, category) {
-        const jsonBody = {
+        const body = {
             userId: state.authCredential.userId,
             constraints: {
                 strSearch: strSearch,
@@ -339,11 +332,11 @@ const methods = {
                 category: category
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, JSON.stringify(jsonBody))
+        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, JSON.stringify(body))
     },
     async uploadProfile() {
         state.navigation.modal_popup.isUploadingImg = true
-        const url = "http://localhost:4000/Api/upload/avatar"
+        const url = env.configs.API_URL + "upload/avatar"
         const headers = new Headers({
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -451,28 +444,27 @@ const methods = {
             return;
         }
     },
-    async refreshToken(){
+    async refreshToken() {
         try {
-            console.log("refresh token executed ")
-            const url = "http://localhost:4000/Api/refresh/token"
+            const url = env.configs.API_URL + "refresh/token"
             const response = await fetch(url, {
                 method: "GET",
-                credentials:"include"
+                credentials: "include"
             })
-            if (response.status === 200){
+            if (response.status === 200) {
                 const jsonResponse = await response.json()
                 state.authCredential.userId = jsonResponse.data.id
                 state.authCredential.email = jsonResponse.data.email
                 state.authCredential.avatar = jsonResponse.data.avatar
                 state.authCredential.token = jsonResponse.data.accessToken
                 state.authCredential.tokenType = jsonResponse.data.tokenType
-            }else{
+            } else {
                 throw "Had an issue while refreshing the token! means the refresh token is no longer valid!!"
             }
-        }catch (e) {
+        } catch (e) {
             throw e.message
         }
-     }
+    }
 }
 
 export default {

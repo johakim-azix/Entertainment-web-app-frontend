@@ -167,6 +167,7 @@
         },
         mounted() {
             this.refreshTokenLoop()
+
         },
         beforeUnmount() {
             clearInterval(this.refreshing)

@@ -28,8 +28,9 @@
                             <img id="previewImg" src="" alt="">
                         </div>
                     </div>
-                    <span  :class="{hidden:!store.state.navigation.modal_popup.isUploadingImg}"></span>
-                    <button id="submitProfile" v-if="store.state.navigation.modal_popup.isSelectingImg" @click="saveProfile" disabled>
+                    <span :class="{hidden:!store.state.navigation.modal_popup.isUploadingImg}"></span>
+                    <button id="submitProfile" v-if="store.state.navigation.modal_popup.isSelectingImg"
+                            @click="saveProfile" disabled>
                         <img src="../assets/icons/icon-check.svg" alt="">
                     </button>
                 </div>
@@ -47,6 +48,11 @@
         name: 'HomePage',
         components: {
             sideNavigation,
+        },
+        data() {
+            return{
+                refreshing:null
+            }
         },
         methods: {
             addProfileImg() {
@@ -123,25 +129,50 @@
                 this.store.state.navigation.modal_popup.srcEncoded.medium = this.resizeImg(initialRatio, 150, 150, target)
                 this.store.state.navigation.modal_popup.srcEncoded.small = this.resizeImg(initialRatio, 60, 60, target)
                 previewImgTag.src = this.store.state.navigation.modal_popup.srcEncoded.large
-                if (document.getElementById("submitProfile")===null) return
+                if (document.getElementById("submitProfile") === null) return
                 document.getElementById("submitProfile").disabled = false
+            },
+            refreshTokenLoop(){
+                this.refreshing = setInterval(()=>{
+                    this.store.methods.refreshToken().then().catch(()=>{
+                        this.$router.replace({name: 'login'})
+                    })
+                },20000)
             }
         },
         beforeCreate() {
             if (this.store.state.authCredential.token === null) {
-                this.$router.replace({name: 'login'})
+                //try to reconnect by calling the refresh token method
+                //if it fails then redirect to login
+                this.store.methods
+                    .refreshToken()
+                    .then(() => {
+                        this.store.methods.loadTrendingList()
+                        this.store.methods.loadRecommendations()
+                        this.store.methods.loadMovies()
+                        this.store.methods.loadSeries()
+                        this.store.methods.loadBookmarked()
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                        this.$router.replace({name: 'login'})
+                    })
+            } else {
+                this.store.methods.loadTrendingList()
+                this.store.methods.loadRecommendations()
+                this.store.methods.loadMovies()
+                this.store.methods.loadSeries()
+                this.store.methods.loadBookmarked()
             }
+        },
+        mounted() {
+            this.refreshTokenLoop()
+        },
+        beforeUnmount() {
+            clearInterval(this.refreshing)
         },
         setup() {
             const store = inject("store")
-            if (store.state.authCredential.token !== null) {
-                store.methods.loadTrendingList()
-                store.methods.loadRecommendations()
-                store.methods.loadMovies()
-                store.methods.loadSeries()
-                store.methods.loadBookmarked()
-            }
-
             return {
                 store
             }
@@ -176,7 +207,8 @@
             margin-top: 70px;
             border-radius: 3px;
             position: relative;
-            & > span{
+
+            & > span {
                 display: block;
                 position: absolute;
                 bottom: 7.8px;
@@ -189,10 +221,12 @@
                 border-radius: 100%;
                 background-image: conic-gradient(transparent 200deg, rgba(255, 255, 255, .9) 360deg);
                 animation: rotate 2s infinite linear;
-                &.hidden{
+
+                &.hidden {
                     display: none;
                 }
             }
+
             & > button {
                 position: absolute;
                 bottom: 10px;
@@ -211,9 +245,11 @@
                 align-items: center;
                 background: #161D2F;
                 box-shadow: 2px 2px 3px rgba(0, 0, 0, .5);
-                &.hidden{
+
+                &.hidden {
                     z-index: -10
                 }
+
                 img {
                     height: 50%;
                     width: 60%;
@@ -264,12 +300,14 @@
                     justify-content: space-around;
                     align-items: center;
                     overflow: hidden;
-                    &.enlarge{
-                        img{
-                            height : 200%;
-                            width:200%
+
+                    &.enlarge {
+                        img {
+                            height: 200%;
+                            width: 200%
                         }
                     }
+
                     img {
                         -webkit-filter: blur(5px);
                         -moz-filter: blur(5px);
@@ -300,6 +338,7 @@
                     display: flex;
                     align-items: center;
                     justify-content: space-around;
+
                     img {
                         height: fit-content !important;
                         width: fit-content !important;

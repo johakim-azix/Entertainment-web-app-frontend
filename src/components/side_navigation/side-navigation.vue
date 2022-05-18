@@ -96,9 +96,14 @@
                 this.$emit("onViewProfileImgIntent")
             },
             logout(){
-                //todo : un suscribe to jwt token and delete the authCredentials from the store
-                alert("loging out ")
                 this.store.methods.logout()
+                    .then(()=>{
+                        this.$router.replace({name: 'login'})
+                    })
+                    .catch((error)=>{
+                        alert('there'+error)
+                    })
+
             }
         },
         setup() {

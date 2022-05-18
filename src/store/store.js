@@ -4,6 +4,7 @@ const state = reactive({
     isNavigatingInFromLogin: false,
     authCredential: {
         isLogin: false,
+        isLogingOut:false,
         isRegistering: false,
         isInputsValid: false,
         token: null,
@@ -113,7 +114,8 @@ const methods = {
             const response = await fetch(url, {
                 method: "POST",
                 headers: headers,
-                body: strBody
+                body: strBody,
+                credentials:"include"
             })
 
             const jsonResponse = await response.json()
@@ -122,49 +124,71 @@ const methods = {
                 state.authCredential.userId = jsonResponse.data.id
                 state.authCredential.email = jsonResponse.data.email
                 state.authCredential.avatar = jsonResponse.data.avatar
-                state.authCredential.token = jsonResponse.data.token
+                state.authCredential.token = jsonResponse.data.accessToken
                 state.authCredential.tokenType = jsonResponse.data.tokenType
                 state.authCredential.isLogin = false
             }
             return response.status
         } catch (e) {
             console.log(e.message)
-            state.authCredential.isLogin = true
+            state.authCredential.isLogin = false
         }
     },
     async logout() {
-        // try {
-        //     const url = "http://localhost:4000/Api/login"
-        //     const headers = new Headers({
-        //         "Content-type": "application/json"
-        //     })
-        //
-        //     const strBody = '{ "email": "' + email + '",' +
-        //         '              "password":"' + password + '" ' +
-        //         '           }'
-        //
-        //     state.authCredential.isLogin = true
-        //     const response = await fetch(url, {
-        //         method: "POST",
-        //         headers: headers,
-        //         body: strBody
-        //     })
-        //
-        //     const jsonResponse = await response.json()
-        //
-        //     if (response.status === 200) {
-        //         state.authCredential.userId = jsonResponse.data.id
-        //         state.authCredential.email = jsonResponse.data.email
-        //         state.authCredential.avatar = jsonResponse.data.avatar
-        //         state.authCredential.token = jsonResponse.data.token
-        //         state.authCredential.tokenType = jsonResponse.data.tokenType
-        //         state.authCredential.isLogin = false
-        //     }
-        //     return response.status
-        // } catch (e) {
-        //     console.log(e.message)
-        //     state.authCredential.isLogin = true
-        // }
+        try {
+            const url = "http://localhost:4000/Api/logout"
+
+            state.authCredential.isLogingOut = true
+            const response = await fetch(url, {
+                method: "GET",
+                credentials: "include"
+            })
+
+            if (response.status === 200) {
+                //todo : reinitialize everything on the user and navogation
+                state.authCredential = {
+                    isLogin: false,
+                    isLogingOut:false,
+                    isRegistering: false,
+                    isInputsValid: false,
+                    token: null,
+                    tokenType: null,
+                    userId: null,
+                    email: null,
+                    avatar: {
+                        large: null,
+                        medium: null,
+                        small: null,
+                    }
+                }
+
+                state.navigation = {
+                    activeLink: {
+                        home: false,
+                        movies: false,
+                        series: false,
+                        bookmarked: false
+                    },
+                    modal_popup: {
+                        isImgShowerOpened: false,
+                        isProfilePopupOpened: false,
+                        isUploadingImg: false,
+                        isSelectingImg: false,
+                        srcEncoded: {
+                            large: "",
+                            medium: "",
+                            small: ""
+                        }
+                    }
+                }
+
+                state.authCredential.isLogingOut = false
+            }
+            return response.status
+        } catch (e) {
+            console.log(e.message)
+            state.authCredential.isLogingOut = true
+        }
     },
     async loadTrendingList() {
         const strBody = '{"userId": "' + state.authCredential.userId + '",' +
@@ -229,7 +253,8 @@ const methods = {
             const response = await fetch(url, {
                 method: "POST",
                 headers: headers,
-                body: strBody
+                body: strBody,
+                credentials:"include"
             })
 
             const jsonResponse = await response.json()
@@ -425,7 +450,29 @@ const methods = {
         } else {
             return;
         }
-    }
+    },
+    async refreshToken(){
+        try {
+            console.log("refresh token executed ")
+            const url = "http://localhost:4000/Api/refresh/token"
+            const response = await fetch(url, {
+                method: "GET",
+                credentials:"include"
+            })
+            if (response.status === 200){
+                const jsonResponse = await response.json()
+                state.authCredential.userId = jsonResponse.data.id
+                state.authCredential.email = jsonResponse.data.email
+                state.authCredential.avatar = jsonResponse.data.avatar
+                state.authCredential.token = jsonResponse.data.accessToken
+                state.authCredential.tokenType = jsonResponse.data.tokenType
+            }else{
+                throw "Had an issue while refreshing the token! means the refresh token is no longer valid!!"
+            }
+        }catch (e) {
+            throw e.message
+        }
+     }
 }
 
 export default {

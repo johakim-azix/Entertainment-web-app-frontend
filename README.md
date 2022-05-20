@@ -49,47 +49,61 @@ Then crop/optimize/edit your image however you like, add it to your project, and
 - Backend Solution URL: [Add solution URL here](https://your-solution-url.com)
 
 ## My process
-#### step 1 : template building
-I started by building the responsive template (html, scss), then i've extracted components, pages, with their style, and logic (at this state empty js).
-From that i had a clear idea of how i wanted him to navigate through the app.
+#### step 1 : templating
+- Template building (responsive html and css template)
+- Components extraction (determined what will be a component and move them to separate file with their style and js logic).
+
+That gave and idea on how navigation will look like.
 
 #### step 2 : Routing
-##### Page navigation : 
-Navigation between register, login, and home; so my first router-view where will be displayed either login either register or home page with navigation items and corresponding fragments.
+##### Page navigation :
+First router-view : navigation between register, login, and home pages. 
+- Setting up Vue router and first routes (/register, /login, /home).
+- Determining my first router-view Location.  
+
 
 ##### Fragment navigation :
-Navigation between  movies, series, recommendation, bookmarked and search fragment.
-So the router-view where will be displayed fragments for each side navigation item(movies, series, recommendation and bookmarked).
-At the end of this step i have a full vue entertainment web app template, With data from the data.json, and some logic in components.
+Second router-view : navigation between  movies, series, recommendation, bookmarked and search fragments.
+- Completing router with routes corresponding to each side navigation item and fragment.
+- Determining my second router-view Location.
+- Determining witch component (Fragment) should be lazy loaded or not. 
+- Feeding components with data provided by the data.json file : here i've mostly completed some js component logic like communication between components(setting props, and events, etc...)
+
+At the end of this step i had a almost full Vue.js entertainment web app template.
+
+I could have been ahead, working arround with IDB of the browser for a full frontend implementation but i wanted to build it full stack.
 
 #### step 3 : building backend 
 Actually the backend is a separate project.
-It's built with : Node.js, Express.js and MongoDB.
+It's built with : Node.js, Express.js and MongoDB and some additionnal dependencies like mongoose.
 
-During this step i : 
+I can brake this step as : 
 
-- Choose conventions, and project patern (architecture : how files will be organized); 
+- Choosing conventions, and project patern (architecture : how files will be organized); 
 
 ![Backend Project Structure](./src/assets/backend%20pattern.PNG)
 
 
 
-##### Setup and Express App, connexion to mongoDb, environment configs, general middleware that allow request from the frontend, some headers, methods etc...
+- Spinning up a basic server Node
+- Connecting to mongoDb, 
+- Adding environment configs 
+- Setting up an Express App, adding general middleware that allow request from the frontend, some headers, methods etc...
 ```js
-const env = require("../env.configs")
+const env = require("../env")
 const mongoose = require("mongoose")
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const app = express()
 const authRouter = require("../routers/Auth")
 const mediaRouter = require("../routers/Media")
-mongoose.connect(env.configs.DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}).then(() => console.log(' MongoDB : connexion Ok !')).catch(() => console.log('MongoDB : connexion Ko !'));
+mongoose.connect(env.DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}).then(() => console.log('Connexion à MongoDB réussie !')).catch(() => console.log('Connexion à MongoDB échouée !'));
 
 app.use(express.json());
 app.use(cookieParser());
 app.use("/public",express.static("public"))
 app.use((req, res, next) => { /*todo : general middleware ; it's applied to every request*/
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+    res.setHeader('Access-Control-Allow-Origin', env.CLIENT_URL);
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -105,8 +119,21 @@ module.exports = app
 
 - Setting up auth session with refresh and access token  
 
-#### step 4 : Link the frontend to the backend,  State management  
-I've completed the frontend side with state management, events etc... 
+#### Step 4 : Link the frontend to the backend,  State management, Authentication
+- Completing the store logic
+- Implementing logic for the user session with refresh, access token, and required redirection.   
+
+#### Step 5 : Testing and Deployment
+- App testing the app and made some adjustments.
+- Domain name registration.
+- Subdomain creation.
+- Digital ocean droplet creation, domain to server name linking.
+- Droplet configuration : user creation, setting ssh authentication, installing Git, Node, Vue, MongoDb, Nginx.
+- Pulling projects from github, setting up permission.
+- Installing dependencies and building projects .
+- Executing seeder on db so as to add records on media collection
+- Individually launching app
+- Setting up Nginx configurations, and server blocs
 
 ### Built with
 
@@ -140,14 +167,15 @@ I tried a custom jwt refresh and access token implementation, avoided storing au
    
 ### Continued development
 
-
 I'm actually in a poor internet connexion area while building this app.
-For the future release i'm planning to add feature, a kind of administration panel, where i'll be adding content to the app.
+For the future release i'm planning to add a feature, a kind of administration panel, where i'll be adding content to the app.
 Since content has images, with a specific dimensions and qualities, and i don't wanna treat them externally (resize them on photoshop as example), the feature will then rely on image treatment and upload!!
 Once again we should avoid poor user experience.
 
-So next topics will be : 
-##### Css and Js image optimization.
+So next topics will be :
+- Css and Js image optimization: i've already started by implementing a profile upload but i'm not yet satisfied.
+- Real time communication server VS clients : i'll give a try to a custom socket.io implementation to handle the new media added event (the change should be spread to all client once a new medias are added).
+- Maybe we'll move to a PWA implementation ...
 
 
 ## Author

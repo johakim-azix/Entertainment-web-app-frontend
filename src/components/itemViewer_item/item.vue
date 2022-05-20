@@ -1,7 +1,7 @@
 <template>
     <div class="item"> <!--todo : component to be : movie item component -->
         <div class="item__attach">
-            <img :src="env.configs.IMG_URL+itemData.images.regular.large" :alt="itemData.images.regular.large">
+            <img :src="env.IMG_URL+itemData.images.regular.large" :alt="itemData.images.regular.large">
             <div class="cover">
                 <div class="btn-play">
                     <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +32,7 @@
 
 <script>
     import {inject} from "vue"
-    import env from "../../../env.configs"
+    import env from "../../../env"
     export default {
         // eslint-disable-next-line vue/multi-word-component-names
         name: "item",

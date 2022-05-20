@@ -1,5 +1,5 @@
 import {reactive} from "vue"
-import env from "../../env.configs"
+import env from "../../env"
 
 const state = reactive({
     isNavigatingInFromLogin: false,
@@ -82,7 +82,7 @@ const state = reactive({
 
 const methods = {
     async register(email, password) {
-        const url = env.configs.API_URL + "register"
+        const url = env.API_URL + "register"
         const headers = new Headers({
             "Content-type": "application/json"
         })
@@ -102,7 +102,7 @@ const methods = {
         try {
             state.authCredential.isLogin = true
 
-            const url = env.configs.API_URL + "login"
+            const url = env.API_URL + "login"
             const headers = new Headers({
                 "Content-type": "application/json"
             })
@@ -134,7 +134,7 @@ const methods = {
     },
     async logout() {
         try {
-            const url = env.configs.API_URL + "logout"
+            const url = env.API_URL + "logout"
             state.authCredential.isLogingOut = true
             const response = await fetch(url, {
                 method: "GET",
@@ -241,7 +241,7 @@ const methods = {
     },
     async fetchData(token, stateProperty, strBody) {
         try {
-            const url = env.configs.API_URL + "medias/filter"
+            const url = env.API_URL + "medias/filter"
             stateProperty.isLoading = true
             state.search.name = ""
             const headers = new Headers({
@@ -285,7 +285,7 @@ const methods = {
             btn.disabled = true //disable the btn
             btn.classList.toggle("request-going")
 
-            const url = env.configs.API_URL + "add/bookmark"
+            const url = env.API_URL + "add/bookmark"
             const headers = new Headers({
                 "Content-type": "application/json",
                 "Authorization": state.authCredential.token
@@ -336,7 +336,7 @@ const methods = {
     },
     async uploadProfile() {
         state.navigation.modal_popup.isUploadingImg = true
-        const url = env.configs.API_URL + "upload/avatar"
+        const url = env.API_URL + "upload/avatar"
         const headers = new Headers({
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -446,7 +446,7 @@ const methods = {
     },
     async refreshToken() {
         try {
-            const url = env.configs.API_URL + "refresh/token"
+            const url = env.API_URL + "refresh/token"
             const response = await fetch(url, {
                 method: "GET",
                 credentials: "include"

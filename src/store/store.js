@@ -114,8 +114,29 @@ const methods = {
             const response = await fetch(url, {
                 method: "POST",
                 headers: headers,
-                body: JSON.stringify(body),
-                credentials: "include"
+                body: JSON.stringify(body)
+            })
+            const jsonResponse = await response.json()
+            if (response.status === 200) {
+                state.authCredential.isLogin = false
+                this.setSessionCookie(env.LOGIN_INFO_COOKIE_NAME, jsonResponse.data.accessToken, 1)
+            }
+            return response.status
+        } catch (e) {
+            console.log(e.message)
+            state.authCredential.isLogin = false
+        }
+    },
+    async getUserData() {
+        try {
+            const url = env.API_URL + "user"
+            const headers = new Headers({
+                "Content-type": "application/json",
+                "Authorization": "Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME)
+            })
+            const response = await fetch(url, {
+                method: "GET",
+                headers: headers,
             })
             const jsonResponse = await response.json()
             if (response.status === 200) {
@@ -124,61 +145,51 @@ const methods = {
                 state.authCredential.avatar = jsonResponse.data.avatar
                 state.authCredential.token = jsonResponse.data.accessToken
                 state.authCredential.tokenType = jsonResponse.data.tokenType
-                state.authCredential.isLogin = false
             }
-            return response.status
         } catch (e) {
             console.log(e.message)
-            state.authCredential.isLogin = false
         }
     },
     async logout() {
         try {
-            const url = env.API_URL + "logout"
             state.authCredential.isLogingOut = true
-            const response = await fetch(url, {
-                method: "GET",
-                credentials: "include"
-            })
-            if (response.status === 200) { //reinitialize everything on the user and navogation
-                state.authCredential = {
-                    isLogin: false,
-                    isLogingOut: false,
-                    isRegistering: false,
-                    isInputsValid: false,
-                    token: null,
-                    tokenType: null,
-                    userId: null,
-                    email: null,
-                    avatar: {
-                        large: null,
-                        medium: null,
-                        small: null,
-                    }
+            if (!this.deleteSessionCookie(env.LOGIN_INFO_COOKIE_NAME)) throw new Error("the cookie hasn't been deleted ...")
+            state.authCredential = {
+                isLogin: false,
+                isLogingOut: false,
+                isRegistering: false,
+                isInputsValid: false,
+                token: null,
+                tokenType: null,
+                userId: null,
+                email: null,
+                avatar: {
+                    large: null,
+                    medium: null,
+                    small: null,
                 }
-
-                state.navigation = {
-                    activeLink: {
-                        home: false,
-                        movies: false,
-                        series: false,
-                        bookmarked: false
-                    },
-                    modal_popup: {
-                        isImgShowerOpened: false,
-                        isProfilePopupOpened: false,
-                        isUploadingImg: false,
-                        isSelectingImg: false,
-                        srcEncoded: {
-                            large: "",
-                            medium: "",
-                            small: ""
-                        }
-                    }
-                }
-                state.authCredential.isLogingOut = false
             }
-            return response.status
+
+            state.navigation = {
+                activeLink: {
+                    home: false,
+                    movies: false,
+                    series: false,
+                    bookmarked: false
+                },
+                modal_popup: {
+                    isImgShowerOpened: false,
+                    isProfilePopupOpened: false,
+                    isUploadingImg: false,
+                    isSelectingImg: false,
+                    srcEncoded: {
+                        large: "",
+                        medium: "",
+                        small: ""
+                    }
+                }
+            }
+            state.authCredential.isLogingOut = false
         } catch (e) {
             console.log(e.message)
             state.authCredential.isLogingOut = true
@@ -193,7 +204,7 @@ const methods = {
                 category: null
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.trending, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.trending, JSON.stringify(body))
     },
     async loadRecommendations() {
         const body = {
@@ -204,7 +215,7 @@ const methods = {
                 category: null
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.recommendation, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.recommendation, JSON.stringify(body))
     },
     async loadMovies() {
         const body = {
@@ -215,7 +226,7 @@ const methods = {
                 category: "Movie"
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.movies, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.movies, JSON.stringify(body))
     },
     async loadSeries() {
         const body = {
@@ -226,7 +237,7 @@ const methods = {
                 category: "TV Series"
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.series, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.series, JSON.stringify(body))
     },
     async loadBookmarked() {
         const body = {
@@ -237,7 +248,7 @@ const methods = {
                 category: null
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.bookmarked, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.bookmarked, JSON.stringify(body))
     },
     async fetchData(token, stateProperty, strBody) {
         try {
@@ -288,7 +299,7 @@ const methods = {
             const url = env.API_URL + "add/bookmark"
             const headers = new Headers({
                 "Content-type": "application/json",
-                "Authorization": state.authCredential.token
+                "Authorization": "Bearer "+this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME)
             })
             const body = {
                 userId: state.authCredential.userId,
@@ -332,7 +343,7 @@ const methods = {
                 category: category
             }
         }
-        await methods.fetchData(state.authCredential.tokenType + " " + state.authCredential.token, state.search, JSON.stringify(body))
+        await methods.fetchData("Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME), state.search, JSON.stringify(body))
     },
     async uploadProfile() {
         state.navigation.modal_popup.isUploadingImg = true
@@ -340,7 +351,7 @@ const methods = {
         const headers = new Headers({
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            "Authorization": 'Bearer ' + state.authCredential.token
+            "Authorization": "Bearer " + this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME)
         })
         const response = await fetch(url, {
             method: "POST",
@@ -444,26 +455,41 @@ const methods = {
             return;
         }
     },
-    async refreshToken() {
+    checkSessionUserInfo() {
+        if (this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME) !== "") return true
+        return false
+    },
+    setSessionCookie(name, value, expireDays) {
+        const date = new Date()
+        date.setTime(date.getTime() + (expireDays * 24 * 60 * 60 * 1000))
+        let expires = "expires=" + date.toUTCString()
+        // let domain = "domain=*localhost"
+        document.cookie = name + "=" + value + ";" + expires + ";path=/"
+    },
+    deleteSessionCookie(name){
         try {
-            const url = env.API_URL + "refresh/token"
-            const response = await fetch(url, {
-                method: "GET",
-                credentials: "include"
-            })
-            if (response.status === 200) {
-                const jsonResponse = await response.json()
-                state.authCredential.userId = jsonResponse.data.id
-                state.authCredential.email = jsonResponse.data.email
-                state.authCredential.avatar = jsonResponse.data.avatar
-                state.authCredential.token = jsonResponse.data.accessToken
-                state.authCredential.tokenType = jsonResponse.data.tokenType
-            } else {
-                throw "Had an issue while refreshing the token! means the refresh token is no longer valid!!"
-            }
-        } catch (e) {
-            throw e.message
+            const value = this.getSessionCookie(env.LOGIN_INFO_COOKIE_NAME)
+            const expires = "expires=sat, 20 Jan 1980 12:00:00 UTC"
+            document.cookie = name + "=" + value + ";" + expires + ";path=/"
+            return true
+        }catch (e) {
+            console.log(e.message)
+            return false
         }
+    },
+    getSessionCookie(name) {
+        let str = name + "="
+        let cookies = document.cookie.split(";")
+        let value = ""
+        cookies.forEach(cookie => {
+            while (cookie.charAt(0) === ' ') {
+                cookie.substring(1)
+            }
+            if (cookie.indexOf(str) === 0) {
+                value = cookie.substring(str.length, cookie.length)
+            }
+        })
+        return value
     }
 }
 

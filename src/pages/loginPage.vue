@@ -66,6 +66,7 @@
                 const responseStatus = await this.store.methods.login(email, pwd)
 
                 if (responseStatus === 200) {
+                    // await this.store.methods.getUserData()
                     await this.$router.push({name: 'homePage'})
                 } else {
                     if (responseStatus === 400 || responseStatus === 401) error.innerText = "Seems like the provided login and password don't match!"
@@ -80,8 +81,16 @@
             }
         },
         beforeCreate() {
-            if (this.store.state.authCredential.token !== null) {
+
+            // if (this.store.state.authCredential.token !== null) {
+            //     this.$router.push({name: 'homePage'})
+            // }
+
+            if (this.store.methods.checkSessionUserInfo()) {
                 this.$router.push({name: 'homePage'})
+                // this.store.methods.getUserData().then(()=>{
+                //     this.$router.push({name: 'homePage'})
+                // })
             }
         },
         setup() {
@@ -156,6 +165,8 @@
     .content {
         max-width: 400px;
         width: 100%;
+        padding-bottom: 250px;
+
 
         .logo {
             width: 32px;
@@ -186,6 +197,9 @@
                 width: 150%;
                 z-index: -1;
             }
+            @media (max-width: 400px) {
+                border-radius: 0;
+            }
         }
 
         .form-container {
@@ -194,7 +208,6 @@
             border-radius: 20px;
             transition: all ease-in-out .15s;
             z-index: 1;
-
 
             &__title {
                 margin: 0 0 40px 0;

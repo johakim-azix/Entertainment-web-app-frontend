@@ -57,7 +57,7 @@
 
     .nav-drawer {
         height: 100%;
-        width: calc(100% - 0px);
+        width: calc(100% - 40px);
         overflow-y: auto;
         overflow-x: hidden;
         @media (max-width: 768px) {
@@ -67,6 +67,7 @@
 
         @media (max-width: 500px) {
             padding-top: 0;
+            height: calc(100% - 50px);
         }
 
         &::-webkit-scrollbar {

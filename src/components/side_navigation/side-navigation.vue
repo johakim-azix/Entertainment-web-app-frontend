@@ -188,7 +188,7 @@
 
         .avatar {
             align-self: flex-end;
-            border: solid white 1px;
+            border: solid rgba(255,255,255,.1) 1px;
             border-radius: 100%;
             height: 50px;
             width: 50px;

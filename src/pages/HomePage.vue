@@ -49,11 +49,6 @@
         components: {
             sideNavigation,
         },
-        data() {
-            return{
-                refreshing:null
-            }
-        },
         methods: {
             addProfileImg() {
                 const imgInput = document.getElementsByName("profile_img")[0]
@@ -132,45 +127,23 @@
                 if (document.getElementById("submitProfile") === null) return
                 document.getElementById("submitProfile").disabled = false
             },
-            refreshTokenLoop(){
-                this.refreshing = setInterval(()=>{
-                    this.store.methods.refreshToken().then().catch(()=>{
-                        this.$router.replace({name: 'login'})
-                    })
-                },20000)
-            }
         },
         beforeCreate() {
-            if (this.store.state.authCredential.token === null) {
-                //try to reconnect by calling the refresh token method
-                //if it fails then redirect to login
-                this.store.methods
-                    .refreshToken()
-                    .then(() => {
-                        this.store.methods.loadTrendingList()
-                        this.store.methods.loadRecommendations()
-                        this.store.methods.loadMovies()
-                        this.store.methods.loadSeries()
-                        this.store.methods.loadBookmarked()
+                if (this.store.methods.checkSessionUserInfo()){
+                    /*means we have valid user info in session the we use them*/
+          this.store.methods.getUserData().then(()=>{
+                        if (this.store.state.authCredential.userId!==null&&this.store.state.authCredential.userId!==undefined){
+                            this.store.methods.loadTrendingList()
+                            this.store.methods.loadRecommendations()
+                            this.store.methods.loadMovies()
+                            this.store.methods.loadSeries()
+                            this.store.methods.loadBookmarked()
+                        }
                     })
-                    .catch((error) => {
-                        console.log(error)
-                        this.$router.replace({name: 'login'})
-                    })
-            } else {
-                this.store.methods.loadTrendingList()
-                this.store.methods.loadRecommendations()
-                this.store.methods.loadMovies()
-                this.store.methods.loadSeries()
-                this.store.methods.loadBookmarked()
-            }
-        },
-        mounted() {
-            this.refreshTokenLoop()
-
-        },
-        beforeUnmount() {
-            clearInterval(this.refreshing)
+                }else{
+                    /*means there is no valid login info in the sessio so redirect to login to get new one*/
+                    this.$router.replace({name: 'login'})
+                }
         },
         setup() {
             const store = inject("store")
@@ -185,8 +158,6 @@
     .hidden {
         display: none;
     }
-
-
     .modal-backdrop {
         background-color: rgba(255, 255, 255, .2);
         height: 100%;

@@ -1,2 +1,5 @@
-exports.API_URL = "http://localhost:4000/Api/"
-exports.IMG_URL = "http://localhost:4000/"
+exports.API_URL = "http://marlonne-penda.space:4000/Api/"
+exports.IMG_URL = "http://marlonne-penda.space:4000/"
+// exports.API_URL = "http://localhost:4000/Api/"
+// exports.IMG_URL = "http://localhost:4000/"
+exports.LOGIN_INFO_COOKIE_NAME = "USER_INFO"

@@ -71,7 +71,6 @@
                 if (pwd.trim().length < 8) results.pwd.tooShort = true
                 if (pwd !== pwdConfirm) results.pwdConfirm.notMatch = true
                 if (results.email.isEmpty || results.email.notValid || results.pwd.tooShort || results.pwdConfirm.notMatch) {
-                    // results.hasIssues = true
                     btnSubmit.disabled = true
                 } else {
                     btnSubmit.disabled = false
@@ -218,6 +217,7 @@
     .content {
         max-width: 400px;
         width: 100%;
+        padding-bottom: 250px;
 
         .logo {
             width: 32px;
@@ -248,6 +248,9 @@
                 width: 150%;
                 z-index: -1;
             }
+            @media (max-width: 400px) {
+                border-radius: 0;
+            }
         }
 
 
@@ -258,7 +261,6 @@
             transition: all ease-in-out .15s;
 
             &__title {
-                /*border:solid red 1px;*/
                 margin: 0 0 40px 0;
                 font-weight: normal;
             }
@@ -428,7 +430,5 @@
             }
         }
     }
-
-
 
 </style>
